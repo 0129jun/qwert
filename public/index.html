@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>광운대 식당 좌석</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1><a href="index.html">광운대 식당</a></h1>
+    <ol>
+        <li><a href="1.html">윤식당</a></li>
+        <li><a href="2.html">후문식당</a></li>
+        <li><a href="3.html">경대컵밥</a></li>
+        <li><a href="4.html">밥은화</a></li>
+    </ol>
+
+    <h2>윤식당 카운터</h2>
+    <div id="counter">로딩 중...</div> <!-- 서버에서 동기화된 카운트를 표시할 영역 -->
+
+    <script>
+        // 서버에서 카운트 값을 가져와서 표시하는 함수
+        async function fetchCount() {
+            const response = await fetch('/count');
+            const data = await response.json();
+            document.getElementById('counter').innerText = '현재 카운트: ' + data.count;
+        }
+
+        // 페이지 로드 시 카운트 값을 가져옵니다.
+        window.onload = fetchCount;
+    </script>
+</body>
+</html>

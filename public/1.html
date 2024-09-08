@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카운터</title>
+    <style>
+        button {
+            font-size: 20px;
+            margin: 5px;
+        }
+        #result {
+            font-size: 30px;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        // 서버에서 카운트 값을 가져오는 함수
+        async function fetchCount() {
+            const response = await fetch('/count');
+            const data = await response.json();
+            document.getElementById('result').innerText = data.count;
+        }
+
+        // 서버에 카운트 값을 업데이트하는 함수
+        async function handleButtonClick(action) {
+            const response = await fetch('/count', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action }),
+            });
+            const data = await response.json();
+            document.getElementById('result').innerText = data.count;
+        }
+
+        // 페이지 로드 시 초기 카운트 값을 가져옵니다.
+        window.onload = fetchCount;
+    </script>
+</head>
+<body>
+    <h1>윤식당 카운터</h1>
+    <input type="button" onclick="handleButtonClick('plus')" value="+" />
+    <input type="button" onclick="handleButtonClick('minus')" value="-" />
+    <div id="result">0</div> <!-- 서버에서 가져온 카운트 값을 표시할 영역 -->
+</body>
+</html>
