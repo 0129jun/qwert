@@ -1,45 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+    <title>후문식당 좌석 관리</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>후문식당 카운터</title>
     <style>
-        button {
-            font-size: 20px;
-            margin: 5px;
+        .seat {
+            width: 80px;
+            height: 50px;
+            background-color: white;
+            border: 2px solid black;
+            display: inline-block;
+            margin: 10px;
+            cursor: pointer;
         }
-        #result {
-            font-size: 30px;
-            margin-top: 10px;
+        .occupied {
+            background-color: red;
+        }
+        #seats-container {
+            display: grid;
+            grid-template-columns: repeat(2, auto);
+            grid-gap: 10px;
+            justify-content: center;
+        }
+        #status {
+            font-size: 20px;
+            margin-top: 20px;
+            text-align: center;
         }
     </style>
+</head>
+<body>
+    <h1 style="text-align: center;">후문식당 좌석 관리</h1>
+    <div id="seats-container"></div>
+    <div id="status">
+        앉아있는 사람: <span id="occupied-count">0</span>명, 빈 자리: <span id="empty-count">10</span>자리
+    </div>
+
     <script>
-        async function fetchCount() {
-            const response = await fetch('/count/backgate');  // 'backgate' 식당 카운트 요청
+        const totalSeats = 10;
+        const seatsContainer = document.getElementById('seats-container');
+        let emptyCount = totalSeats;
+        let occupiedCount = 0;
+
+        async function fetchSeats() {
+            const response = await fetch('/seats/backgate');
             const data = await response.json();
-            document.getElementById('result').innerText = data.count;
+            updateSeats(data.seats);
         }
 
-        async function handleButtonClick(action) {
-            const response = await fetch('/count/backgate', {  // 'backgate' 식당 카운트 업데이트
+        function updateSeats(seats) {
+            seatsContainer.innerHTML = ''; // 좌석 컨테이너 초기화
+            emptyCount = 0;
+            occupiedCount = 0;
+            
+            seats.forEach((isOccupied, index) => {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                if (isOccupied) {
+                    seat.classList.add('occupied');
+                    occupiedCount++;
+                } else {
+                    emptyCount++;
+                }
+
+                seat.addEventListener('click', () => toggleSeat(index, seat));
+                seatsContainer.appendChild(seat);
+            });
+
+            updateStatus();
+        }
+
+        async function toggleSeat(index, seat) {
+            const isOccupied = seat.classList.contains('occupied');
+            const newStatus = !isOccupied;
+
+            const response = await fetch('/seats/backgate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ action }),
+                body: JSON.stringify({ index, status: newStatus }),
             });
+
             const data = await response.json();
-            document.getElementById('result').innerText = data.count;
+            updateSeats(data.seats);
         }
 
-        window.onload = fetchCount;
+        function updateStatus() {
+            document.getElementById('empty-count').innerText = emptyCount;
+            document.getElementById('occupied-count').innerText = occupiedCount;
+        }
+
+        window.onload = fetchSeats;
     </script>
-</head>
-<body>
-    <h1>후문식당 카운터</h1>
-    <input type="button" onclick="handleButtonClick('plus')" value="+" />
-    <input type="button" onclick="handleButtonClick('minus')" value="-" />
-    <div id="result">0</div>
 </body>
 </html>
