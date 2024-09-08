@@ -30,7 +30,7 @@
     <script>
         // 서버에서 카운트 값을 가져오는 함수
         async function fetchCount() {
-            const response = await fetch('/count?restaurant=윤식당');
+            const response = await fetch('/count?restaurant=후문식당');
             const data = await response.json();
             document.getElementById('result').innerText = data.count;
         }
@@ -42,7 +42,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ action, restaurant: '윤식당' }),
+                body: JSON.stringify({ action, restaurant: '후문식당' }),
             });
             const data = await response.json();
             document.getElementById('result').innerText = data.count;
@@ -53,8 +53,8 @@
     </script>
 </head>
 <body>
-    <h1>윤식당 빈자리</h1>
-    제육 맛집<br>
+    <h1>후문식당 빈자리</h1>
+    그냥<br>
     <input type="button" onclick="handleButtonClick('plus')" value="+" />
     <input type="button" onclick="handleButtonClick('minus')" value="-" />
     <div id="result">0</div> <!-- 서버에서 가져온 카운트 값을 표시할 영역 -->
