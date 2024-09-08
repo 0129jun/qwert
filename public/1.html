@@ -1,23 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <title>광운대 식당 좌석</title>
-    <meta charset="utf-8">
-</head>
-<body>
-    <h1><a href="index.html">광운대 식당</a></h1>
-    <ol>
-        <li><a href="1.html">윤식당</a></li>
-        <li><a href="2.html">후문식당</a></li>
-        <li><a href="3.html">경대컵밥</a></li>
-        <li><a href="4.html">밥은화</a></li>
-    </ol>
-</head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>윤식당 좌석 관리</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* 좌석 블록 스타일 */
         .seat {
             width: 80px;
             height: 50px;
@@ -27,21 +14,15 @@
             margin: 10px;
             cursor: pointer;
         }
-
-        /* 사람이 있는 자리는 빨간색 */
         .occupied {
             background-color: red;
         }
-
-        /* 좌석을 담는 컨테이너 스타일 */
         #seats-container {
             display: grid;
-            grid-template-columns: repeat(2, auto); /* 가로 2칸 */
+            grid-template-columns: repeat(2, auto);
             grid-gap: 10px;
-            justify-content: center; /* 좌석을 가운데 정렬 */
+            justify-content: center;
         }
-
-        /* 상태 표시 스타일 */
         #status {
             font-size: 20px;
             margin-top: 20px;
@@ -51,51 +32,68 @@
 </head>
 <body>
     <h1 style="text-align: center;">윤식당 좌석 관리</h1>
-
-    <!-- 10개의 좌석을 위한 div -->
     <div id="seats-container"></div>
-
-    <!-- 좌석 상태를 표시하는 영역 -->
     <div id="status">
         앉아있는 사람: <span id="occupied-count">0</span>명, 빈 자리: <span id="empty-count">10</span>자리
     </div>
 
     <script>
-        const totalSeats = 10; // 좌석 개수
+        const totalSeats = 10;
         const seatsContainer = document.getElementById('seats-container');
         let emptyCount = totalSeats;
         let occupiedCount = 0;
 
-        // 좌석 생성 및 이벤트 처리
-        for (let i = 0; i < totalSeats; i++) {
-            const seat = document.createElement('div');
-            seat.classList.add('seat');
-            seat.addEventListener('click', () => toggleSeat(seat));
-            seatsContainer.appendChild(seat);
+        async function fetchSeats() {
+            const response = await fetch('/seats/yoon');
+            const data = await response.json();
+            updateSeats(data.seats);
         }
 
-        // 좌석 상태를 토글하는 함수
-        function toggleSeat(seat) {
-            if (seat.classList.contains('occupied')) {
-                seat.classList.remove('occupied');
-                emptyCount++;
-                occupiedCount--;
-            } else {
-                seat.classList.add('occupied');
-                emptyCount--;
-                occupiedCount++;
-            }
+        function updateSeats(seats) {
+            seatsContainer.innerHTML = ''; // 좌석 컨테이너 초기화
+            emptyCount = 0;
+            occupiedCount = 0;
+            
+            seats.forEach((isOccupied, index) => {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                if (isOccupied) {
+                    seat.classList.add('occupied');
+                    occupiedCount++;
+                } else {
+                    emptyCount++;
+                }
+
+                seat.addEventListener('click', () => toggleSeat(index, seat));
+                seatsContainer.appendChild(seat);
+            });
+
             updateStatus();
         }
 
-        // 좌석 상태를 업데이트하는 함수
+        async function toggleSeat(index, seat) {
+            const isOccupied = seat.classList.contains('occupied');
+            const newStatus = !isOccupied;
+
+            const response = await fetch('/seats/yoon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ index, status: newStatus }),
+            });
+
+            const data = await response.json();
+            updateSeats(data.seats);
+        }
+
         function updateStatus() {
             document.getElementById('empty-count').innerText = emptyCount;
             document.getElementById('occupied-count').innerText = occupiedCount;
         }
 
-        // 초기 상태 업데이트
-        updateStatus();
+        // 페이지 로드 시 좌석 상태 불러오기
+        window.onload = fetchSeats;
     </script>
 </body>
 </html>
