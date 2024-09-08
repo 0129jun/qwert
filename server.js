@@ -1,27 +1,37 @@
-// server.js
 const express = require('express');
 const app = express();
 const port = 3000;
 
-let count = 0;
+// 각 식당별 카운트를 저장하는 객체
+let restaurantCounts = {
+    yoon: 0,
+    backgate: 0,
+    cupbop: 0,
+    babunhwa: 0
+};
 
 app.use(express.static('public'));
 app.use(express.json());
 
-// 클라이언트에서 카운트를 가져오는 요청
-app.get('/count', (req, res) => {
+// 특정 식당의 카운트를 가져오는 요청
+app.get('/count/:restaurant', (req, res) => {
+    const restaurant = req.params.restaurant;
+    const count = restaurantCounts[restaurant];
     res.json({ count });
 });
 
-// 카운트를 업데이트하는 요청
-app.post('/count', (req, res) => {
+// 특정 식당의 카운트를 업데이트하는 요청
+app.post('/count/:restaurant', (req, res) => {
+    const restaurant = req.params.restaurant;
     const { action } = req.body;
+
     if (action === 'plus') {
-        count++;
+        restaurantCounts[restaurant]++;
     } else if (action === 'minus') {
-        count--;
+        restaurantCounts[restaurant]--;
     }
-    res.json({ count });
+
+    res.json({ count: restaurantCounts[restaurant] });
 });
 
 app.listen(port, () => {
